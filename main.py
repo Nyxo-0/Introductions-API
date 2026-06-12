@@ -99,6 +99,23 @@ def create_or_update_profile(user: str, password: str, KEY: str, nickname: str =
 def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
+@app.get("/allProfiles")
+def get_all_profiles(KEY: str):
+    checkKey(KEY)
+
+    allProfiles = getAllProfiles()
+    publicProfiles = {}
+    
+    for i, v in allProfiles.items():
+        publicProfiles[i] = {
+            "User" : i,
+            "Nickname" : v["Nickname"],
+            "Pronouns" : v["Pronouns"],
+            "Bio" : v["Bio"]
+        }
+
+    return publicProfiles
+
 @app.get("/profiles/{user}")
 def get_profile(user: str, KEY: str):
     checkKey(KEY)
