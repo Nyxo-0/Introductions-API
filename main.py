@@ -13,9 +13,14 @@ API_KEY = "Hi; hello; how are you?; im great, you?; yeah me too; thats good to h
 #__JSON__# ------------------------------------------------------
 if not os.path.exists(contentFile):
     with open(contentFile, "w") as file:
-        json.dump({}, file, indent=2,)
+        json.dump({}, file, indent="2")
 
 #__APP_STUFF__# ------------------------------------------------------
+
+app = FastAPI(
+    title="Introductions API",
+    description="An API where anyone and everyone can introduce themselves to other users around the world!"
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,10 +29,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app = FastAPI(
-    title="Introductions API",
-    description="An API where anyone and everyone can introduce themselves to other users around the world!"
-)
+#__FUNCTIONS__# ------------------------------------------------------
+
+def dumpJson(content):
+    with open(contentFile, "w") as file:
+        json.dump(content, file, indent=2)
 
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
@@ -42,12 +48,15 @@ def create_or_update_profile(user: str, nickname: str, pronouns: str, bio: str, 
     if user in allProfiles and password != allProfiles[user]["password"]: #Check if the user is already in the system
         raise HTTPException(status_code=403, detail="Invalid password for profile")
     elif not user in allProfiles: #If the user isnt in the system, we make a profile for them
-        newProfile = {
+        newProfile = { #make this new profile
             "Nickname" : nickname,
             "Pronouns" : pronouns,
             "Bio" : bio,
             "password" : password
         }
+        
+        allProfiles[user] = newProfile #add this new profile we just made into the main file
+        dumpJson(allProfiles)
 
 
 #__GET__# ------------------------------------------------------
@@ -61,4 +70,5 @@ def hello():
 
 
 #__PROGRAM__# ------------------------------------------------------
+
 uvicorn.run(app)
