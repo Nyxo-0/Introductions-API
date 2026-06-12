@@ -13,7 +13,7 @@ API_KEY = "Hi; hello; how are you?; im great, you?; yeah me too; thats good to h
 #__JSON__# ------------------------------------------------------
 if not os.path.exists(contentFile):
     with open(contentFile, "w") as file:
-        json.dump({}, file, indent="2")
+        json.dump({}, file, indent=2)
 
 #__APP_STUFF__# ------------------------------------------------------
 
@@ -35,15 +35,31 @@ def dumpJson(content):
     with open(contentFile, "w") as file:
         json.dump(content, file, indent=2)
 
+def checkKey(key):
+    if key != API_KEY: #Make sure the api key is valid
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    
+def getAllProfiles():
+    allProfiles = None
+    with open(contentFile, "r") as profiles: #Read what is in the profiles file
+        allProfiles = json.load(profiles)
+
+    return allProfiles
+
+def lookForProfile(user):
+    allProfiles = getAllProfiles()
+    
+    if user in allProfiles:
+        return True, allProfiles[user]
+    else:
+        return False, {}
+
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
 def create_or_update_profile(user: str, password: str, KEY: str, nickname: str = "", pronouns: str = "", bio: str = "", newPassword: str = ""):
-    if KEY != API_KEY: #Make sure the api key is valid
-        raise HTTPException(status_code=401, detail="Invalid API Key")
-    
-    allProfiles = None
-    with open(contentFile, "r") as profiles: #Read what is currently in the profiles file
-        allProfiles = json.load(profiles)
+    checkKey(KEY)
+
+    allProfiles = getAllProfiles()
     
     if user in allProfiles and password != allProfiles[user]["password"]: #Check if the user is already in the system
         raise HTTPException(status_code=403, detail="Invalid password for profile")
@@ -81,9 +97,28 @@ def create_or_update_profile(user: str, password: str, KEY: str, nickname: str =
 def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
-@app.get("/hello")
-def hello():
-    return {"message": "Hello, RaspAPI!"}
+@app.get("/profiles/{user}")
+def get_profile(user: str, KEY: str):
+    checkKey(KEY)
+
+    hasProfile, profile = lookForProfile(user)
+
+    if hasProfile:
+        publicProfile = {
+            "User" : user,
+            "Nickname" : profile["Nickname"],
+            "Pronouns" : profile["Pronouns"],
+            "Bio" : profile["Bio"]
+        }
+
+        return publicProfile
+    else:
+        raise HTTPException(status_code=404, detail="User does not exist")
+
+
+@app.get("/ping")
+def ping():
+    return {"message": "Success"}
 
 
 #__PROGRAM__# ------------------------------------------------------
