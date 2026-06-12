@@ -2,12 +2,15 @@
 import uvicorn
 import os
 import json
-from fastapi import FastAPI, HTTPException
+import time
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 #__GLOBAL_VARIABLES__# ------------------------------------------------------
 contentFile = "data.json"
+rateLimitIps = {}
+rateLimit = 5
 API_KEY = "Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"
 
 #__JSON__# ------------------------------------------------------
@@ -55,11 +58,46 @@ def lookForProfile(user):
         return True, allProfiles[user]
     else:
         return False, {}
+    
+#__RATELIMIT__# ------------------------------------------------------
+
+def getIp(request: Request):
+    forwarded = request.headers.get("X-Forwarded-For")
+
+    if forwarded:
+        return forwarded.split(",")[0].strip #cleans string to good ip
+    
+    return request.client.host
+    
+
+def checkRateLimit(ip: str):
+    limit = False
+    currentTime = time.time()
+
+    if ip in rateLimitIps: #check if the ip should be rate limited
+        lastTime = rateLimitIps[ip]
+
+        if currentTime - lastTime < rateLimit:
+            limit = True
+    else:
+        rateLimitIps[ip] = time.time()
+
+    for i, v in rateLimitIps.items(): #clean up any old rate limit data that isnt needed
+        if currentTime - lastTime > rateLimit:
+            del rateLimitIps[i]
+
+    if limit:
+        raise HTTPException(status_code=429, detail="Too many requests!")
+    
+    return
 
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
 def create_or_update_profile(user: str, password: str, KEY: str, nickname: str = "", pronouns: str = "", bio: str = "", newPassword: str = ""):
     checkKey(KEY)
+
+    Ip = Depends(getIp)
+    checkRateLimit(Ip)
 
     allProfiles = getAllProfiles()
     
@@ -103,6 +141,9 @@ def redirect_to_docs():
 def get_all_profiles(KEY: str):
     checkKey(KEY)
 
+    Ip = Depends(getIp)
+    checkRateLimit(Ip)
+
     allProfiles = getAllProfiles()
     publicProfiles = {}
     
@@ -119,6 +160,9 @@ def get_all_profiles(KEY: str):
 @app.get("/profiles/{user}")
 def get_profile(user: str, KEY: str):
     checkKey(KEY)
+
+    Ip = Depends(getIp)
+    checkRateLimit(Ip)
 
     hasProfile, profile = lookForProfile(user)
 
@@ -137,6 +181,9 @@ def get_profile(user: str, KEY: str):
 
 @app.get("/ping")
 def ping():
+    Ip = Depends(getIp)
+    checkRateLimit(Ip)
+
     return {"message": "Success"}
 
 
