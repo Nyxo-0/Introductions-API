@@ -19,7 +19,9 @@ if not os.path.exists(contentFile):
 
 app = FastAPI(
     title="Introductions API",
-    description="An API where anyone and everyone can introduce themselves to other users around the world!"
+    description=f'''An API where anyone and everyone can introduce themselves to other users around the world!\n\n
+    KEY: {API_KEY}
+    '''
 )
 
 app.add_middleware(
