@@ -37,7 +37,7 @@ def dumpJson(content):
 
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
-def create_or_update_profile(user: str, nickname: str, pronouns: str, bio: str, password: str, KEY: str):
+def create_or_update_profile(user: str, password: str, KEY: str, nickname: str = "", pronouns: str = "", bio: str = "", newPassword: str = ""):
     if KEY != API_KEY: #Make sure the api key is valid
         raise HTTPException(status_code=401, detail="Invalid API Key")
     
@@ -47,6 +47,17 @@ def create_or_update_profile(user: str, nickname: str, pronouns: str, bio: str, 
     
     if user in allProfiles and password != allProfiles[user]["password"]: #Check if the user is already in the system
         raise HTTPException(status_code=403, detail="Invalid password for profile")
+    elif user in allProfiles and password == allProfiles[user]["password"]: #if the user has a profile already and wants to update it, check if the password is correct and update it if it is
+        profile = allProfiles[user]
+
+        if nickname != profile["Nickname"] and nickname != None and nickname != "":
+            profile["Nickname"] = nickname
+        if pronouns != profile["Pronouns"] and pronouns != None and pronouns != "":
+            profile["Pronouns"] = pronouns
+        if bio != profile["Bio"] and bio != None and bio != "":
+            profile["Bio"] = bio
+        if newPassword != profile["password"] and newPassword != None and newPassword != "":
+            profile["password"] = newPassword
     elif not user in allProfiles: #If the user isnt in the system, we make a profile for them
         newProfile = { #make this new profile
             "Nickname" : nickname,
@@ -56,7 +67,13 @@ def create_or_update_profile(user: str, nickname: str, pronouns: str, bio: str, 
         }
         
         allProfiles[user] = newProfile #add this new profile we just made into the main file
-        dumpJson(allProfiles)
+    
+    dumpJson(allProfiles)
+
+    return {
+        "Status" : True,
+        "Details" : "Profile created/updated"
+    }
 
 
 #__GET__# ------------------------------------------------------
