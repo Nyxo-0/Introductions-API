@@ -65,13 +65,14 @@ def getIp(request: Request):
     forwarded = request.headers.get("X-Forwarded-For")
 
     if forwarded:
-        return forwarded.split(",")[0].strip #cleans string to good ip
+        return forwarded.split(",")[0].strip() #cleans string to good ip
     
     return request.client.host
     
 
 def checkRateLimit(ip: str):
     limit = False
+    oldIps = []
     currentTime = time.time()
 
     if ip in rateLimitIps: #check if the ip should be rate limited
@@ -82,9 +83,12 @@ def checkRateLimit(ip: str):
     else:
         rateLimitIps[ip] = time.time()
 
-    for i, v in rateLimitIps.items(): #clean up any old rate limit data that isnt needed
-        if currentTime - lastTime > rateLimit:
-            del rateLimitIps[i]
+    for i, v in rateLimitIps.items(): #find any old rate limit data that isnt needed
+        if currentTime - v > rateLimit:
+            oldIps.append(i)
+
+    for v in oldIps: #clean any old rate limit data that isnt needed
+        del rateLimitIps[v]
 
     if limit:
         raise HTTPException(status_code=429, detail="Too many requests!")
