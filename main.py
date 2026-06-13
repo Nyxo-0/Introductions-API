@@ -181,7 +181,7 @@ def get_random_profile(Ip: str = Depends(getIp)):
     raise HTTPException(status_code=404, detail="No profiles yet")
 
 @app.get("/profiles/{user}")
-def get_profile(user: str, KEY: str, Ip: str = Depends(getIp)):
+def get_specific_profile(user: str, KEY: str, Ip: str = Depends(getIp)):
     checkKey(KEY)
     checkRateLimit(Ip)
 
