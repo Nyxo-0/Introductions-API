@@ -113,13 +113,13 @@ def checkRateLimit(ip: str):
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
 def create_or_update_profile(
-    user: str = Query(..., examples="Nicholas"),
-    password: str = Query(..., examples="password1234"),
-    KEY: str = Query(..., examples="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
-    nickname: str = Query("", examples="Nick"),
-    pronouns: str = Query("", examples="they/them"),
-    bio: str = Query("", examples="Hello, i like painting!"),
-    newPassword: str = Query("", examples="If you want to reset your password and you already have a profile, put your new password you want here!"),
+    user: str = Query(..., examples=["Nicholas"]),
+    password: str = Query(..., examples=["password1234"]),
+    KEY: str = Query(..., examples=["Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"]),
+    nickname: str = Query("", examples=["Nick"]),
+    pronouns: str = Query("", examples=["they/them"]),
+    bio: str = Query("", examples=["Hello, i like painting!"]),
+    newPassword: str = Query("", examples=["If you want to reset your password and you already have a profile, put your new password you want here!"]),
     Ip: str = Depends(getIp)
     ):
 
@@ -166,7 +166,7 @@ def redirect_to_docs():
 
 @app.get("/allProfiles")
 def get_all_profiles(
-    KEY: str = Query(..., examples="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
+    KEY: str = Query(..., examples=["Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"]),
     Ip: str = Depends(getIp)
     ):
 
@@ -196,8 +196,8 @@ def get_random_profile(Ip: str = Depends(getIp)):
 
 @app.get("/profiles/{user}")
 def get_specific_profile(
-    user: str = Path(..., examples="Nicholas"),
-    KEY: str = Query(..., examples="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
+    user: str = Path(..., examples=["Nicholas"]),
+    KEY: str = Query(..., examples=["Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"]),
     Ip: str = Depends(getIp)
     ):
 
