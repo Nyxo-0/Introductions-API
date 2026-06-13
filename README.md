@@ -10,3 +10,5 @@ Using FastAPI, rate limiting was built in and only one request is allowed every 
 
 ### 3. JSON storage system
 A single JSON file is used to store all profiles after every new profile is created so that the data isn't stored in ram and cleared.
+
+If you want to try this API and maybe learn something new about a random stranger, click [here](rp-pi-zero-project.hackclub.app/docs) to see the docs.
