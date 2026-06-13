@@ -209,4 +209,4 @@ def ping(Ip: str = Depends(getIp)):
 
 #__PROGRAM__# ------------------------------------------------------
 
-uvicorn.run(app, host="0.0.0.0", port=8000)
+uvicorn.run(app, host="0.0.0.0")
