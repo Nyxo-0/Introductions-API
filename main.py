@@ -4,7 +4,7 @@ import os
 import json
 import time
 import random
-from fastapi import FastAPI, HTTPException, Request, Depends, Query
+from fastapi import FastAPI, HTTPException, Request, Depends, Query, Path
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -196,7 +196,7 @@ def get_random_profile(Ip: str = Depends(getIp)):
 
 @app.get("/profiles/{user}")
 def get_specific_profile(
-    user: str = Query(..., example="Nicholas"),
+    user: str = Path(..., example="Nicholas"),
     KEY: str = Query(..., example="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
     Ip: str = Depends(getIp)
     ):
