@@ -113,13 +113,13 @@ def checkRateLimit(ip: str):
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
 def create_or_update_profile(
-    user: str = Query(..., description="Nicholas"),
-    password: str = Query(..., description="password1234"),
-    KEY: str = Query(..., description="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
-    nickname: str = Query("", description="Nick"),
-    pronouns: str = Query("", description="they/them"),
-    bio: str = Query("", description="Hello, i like painting!"),
-    newPassword: str = Query("", description="If you want to reset your password and you already have a profile, put your new password you want here!"),
+    user: str = Query(..., example="Nicholas", description="Put your desires username for your profile here"),
+    password: str = Query(..., example="password1234", description="Choose a password for your profile, you will need this to change your profile in the future"),
+    KEY: str = Query(..., example="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;", description="This is given to you at the top"),
+    nickname: str = Query("", example="Nick", description="If you have any nicknames, you can put it here. If not, leave it blank"),
+    pronouns: str = Query("", example="they/them"),
+    bio: str = Query("", example="Hello, i like painting!", description="Just a breif intro to yourself"),
+    newPassword: str = Query("", example="newPassword1234", description="If you already have a profile, and you want to change your password, put it here. If you don't have a profile, this won't do anything"),
     Ip: str = Depends(getIp)
     ):
 
@@ -166,7 +166,7 @@ def redirect_to_docs():
 
 @app.get("/allProfiles")
 def get_all_profiles(
-    KEY: str = Query(..., description="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
+    KEY: str = Query(..., example="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;", description="This is given to you at the top"),
     Ip: str = Depends(getIp)
     ):
 
@@ -196,8 +196,8 @@ def get_random_profile(Ip: str = Depends(getIp)):
 
 @app.get("/profiles/{user}")
 def get_specific_profile(
-    user: str = Path(..., description="Nicholas"),
-    KEY: str = Query(..., description="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
+    user: str = Path(..., example="Nicholas", description="Put your target username here"),
+    KEY: str = Query(..., example="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;", description="This is given to you at the top"),
     Ip: str = Depends(getIp)
     ):
 
