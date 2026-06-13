@@ -3,6 +3,7 @@ import uvicorn
 import os
 import json
 import time
+import random
 from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 #__GLOBAL_VARIABLES__# ------------------------------------------------------
 contentFile = "data.json"
 rateLimitIps = {}
-rateLimit = 5
+rateLimit = 3
 API_KEY = "Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"
 
 #__JSON__# ------------------------------------------------------
@@ -59,6 +60,20 @@ def lookForProfile(user):
     else:
         return False, {}
     
+def getPublicProfiles():
+    allProfiles = getAllProfiles()
+    publicProfiles = {}
+    
+    for i, v in allProfiles.items():
+        publicProfiles[i] = {
+            "User" : i,
+            "Nickname" : v["Nickname"],
+            "Pronouns" : v["Pronouns"],
+            "Bio" : v["Bio"]
+        }
+    
+    return publicProfiles
+    
 #__RATELIMIT__# ------------------------------------------------------
 
 def getIp(request: Request):
@@ -97,10 +112,8 @@ def checkRateLimit(ip: str):
 
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
-def create_or_update_profile(user: str, password: str, KEY: str, nickname: str = "", pronouns: str = "", bio: str = "", newPassword: str = ""):
+def create_or_update_profile(user: str, password: str, KEY: str, nickname: str = "", pronouns: str = "", bio: str = "", newPassword: str = "", Ip: str = Depends(getIp)):
     checkKey(KEY)
-
-    Ip = Depends(getIp)
     checkRateLimit(Ip)
 
     allProfiles = getAllProfiles()
@@ -142,30 +155,34 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 @app.get("/allProfiles")
-def get_all_profiles(KEY: str):
+def get_all_profiles(KEY: str, Ip: str = Depends(getIp)):
     checkKey(KEY)
-
-    Ip = Depends(getIp)
     checkRateLimit(Ip)
 
-    allProfiles = getAllProfiles()
-    publicProfiles = {}
-    
-    for i, v in allProfiles.items():
-        publicProfiles[i] = {
-            "User" : i,
-            "Nickname" : v["Nickname"],
-            "Pronouns" : v["Pronouns"],
-            "Bio" : v["Bio"]
-        }
+    publicProfiles = getPublicProfiles()
 
     return publicProfiles
 
-@app.get("/profiles/{user}")
-def get_profile(user: str, KEY: str):
-    checkKey(KEY)
+@app.get("/randomProfile")
+def get_random_profile(Ip: str = Depends(getIp)):
+    checkRateLimit(Ip)
 
-    Ip = Depends(getIp)
+    allProfiles = getAllProfiles()
+
+    if len(allProfiles) > 0:
+        randProfile = random.choice(list(allProfiles.keys()))
+        publicProfiles = getPublicProfiles()
+
+        if randProfile in publicProfiles.keys():
+            return publicProfiles[randProfile]
+    
+        raise HTTPException(status_code=404, detail="Profile not found")
+    
+    raise HTTPException(status_code=404, detail="No profiles yet")
+
+@app.get("/profiles/{user}")
+def get_profile(user: str, KEY: str, Ip: str = Depends(getIp)):
+    checkKey(KEY)
     checkRateLimit(Ip)
 
     hasProfile, profile = lookForProfile(user)
@@ -184,8 +201,7 @@ def get_profile(user: str, KEY: str):
 
 
 @app.get("/ping")
-def ping():
-    Ip = Depends(getIp)
+def ping(Ip: str = Depends(getIp)):
     checkRateLimit(Ip)
 
     return {"message": "Success"}
