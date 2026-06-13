@@ -112,7 +112,17 @@ def checkRateLimit(ip: str):
 
 #__POST__# ------------------------------------------------------
 @app.post("/profiles")
-def create_or_update_profile(user: str, password: str, KEY: str, nickname: str = "", pronouns: str = "", bio: str = "", newPassword: str = "", Ip: str = Depends(getIp)):
+def create_or_update_profile(
+    user: str = Query(..., example="Nicholas"),
+    password: str = Query(..., example="password1234"),
+    KEY: str = Query(..., example="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
+    nickname: str = Query("", example="Nick"),
+    pronouns: str = Query("", example="they/them"),
+    bio: str = Query("", example="Hello, i like painting!"),
+    newPassword: str = Query("", example="If you want to reset your password and you already have a profile, put your new password you want here!"),
+    Ip: str = Depends(getIp)
+    ):
+
     checkKey(KEY)
     checkRateLimit(Ip)
 
