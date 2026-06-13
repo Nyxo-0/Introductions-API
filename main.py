@@ -165,7 +165,11 @@ def redirect_to_docs():
     return RedirectResponse(url="/docs")
 
 @app.get("/allProfiles")
-def get_all_profiles(KEY: str, Ip: str = Depends(getIp)):
+def get_all_profiles(
+    KEY: str = Query(..., example="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
+    Ip: str = Depends(getIp)
+    ):
+
     checkKey(KEY)
     checkRateLimit(Ip)
 
@@ -191,7 +195,12 @@ def get_random_profile(Ip: str = Depends(getIp)):
     raise HTTPException(status_code=404, detail="No profiles yet")
 
 @app.get("/profiles/{user}")
-def get_specific_profile(user: str, KEY: str, Ip: str = Depends(getIp)):
+def get_specific_profile(
+    user: str = Query(..., example="Nicholas"),
+    KEY: str = Query(..., example="Hi; hello; how are you?; im great, you?; yeah me too; thats good to hear; so what have you been doing all day?; nothin much;"),
+    Ip: str = Depends(getIp)
+    ):
+
     checkKey(KEY)
     checkRateLimit(Ip)
 
